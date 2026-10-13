@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#07111f">
+<title>Weather | آب‌وهوای هوشمند</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root {
+  --bg:#07111f; --card:#101f32; --text:#f3f7ff;
+  --muted:#91a7c2; --blue:#50bfff; --border:#1c3048;
+}
+body.light {
+  --bg:#edf5ff; --card:#fff; --text:#12233b;
+  --muted:#647891; --blue:#087fd1; --border:#dce7f5;
+}
+*{box-sizing:border-box}
+body {
+  margin:0; font-family:Tahoma,Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+  transition:background .3s; min-height:100vh;
+}
+.app {max-width:480px;margin:auto;padding:20px 16px 35px}
+header {display:flex;align-items:center;justify-content:space-between}
+.brand {font-size:18px;font-weight:bold}
+.brand small {display:block;color:var(--muted);font-size:11px;margin-top:5px}
+button,input {font:inherit}
+.iconbtn {
+  background:var(--card);color:var(--text);border:1px solid var(--border);
+  border-radius:14px;padding:10px;cursor:pointer
+}
+.search {display:flex;gap:8px;margin-top:24px}
+.search input {
+  flex:1;min-width:0;background:var(--card);color:var(--text);
+  border:1px solid var(--border);border-radius:14px;padding:14px;outline:none
+}
+.search button {
+  background:var(--blue);color:#041321;border:0;
+  border-radius:14px;padding:0 17px;font-weight:bold;cursor:pointer
+}
+.hero {
+  margin-top:20px;padding:24px 18px;border-radius:26px;
+  background:linear-gradient(145deg,#173b60,#10223b 65%,#17263e);
+  position:relative;overflow:hidden
+}
+body.light .hero {background:linear-gradient(145deg,#c4e7ff,#e9f4ff)}
+.hero:after {
+  content:"";position:absolute;width:180px;height:180px;
+  border-radius:50%;background:#48b8ff12;left:-50px;top:-55px
+}
+.city {font-size:16px;color:#c6e6ff}
+body.light .city {color:#275777}
+.condition {color:#b7cce4;font-size:13px;margin-top:12px}
+body.light .condition {color:#476580}
+.temperature {display:flex;align-items:center;justify-content:space-between;margin-top:15px}
+.temp {font-size:65px;font-weight:300;letter-spacing:-3px}
+.weather-icon {font-size:65px;filter:drop-shadow(0 5px 12px #0003)}
+.feels {font-size:13px;color:#c6ddf4}
+body.light .feels {color:#476580}
+.section-title {font-size:16px;font-weight:bold;margin:25px 2px 14px}
+.stats {display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.card {
+ background:var(--card);border:1px solid var(--border);
+ border-radius:18px;padding:15px 8px;text-align:center
+}
+.stat-icon {font-size:23px}
+.stat-name {font-size:11px;color:var(--muted);margin-top:10px}
+.stat-value {font-size:15px;font-weight:bold;margin-top:9px}
+.hourly {display:flex;gap:10px;overflow-x:auto;padding-bottom:5px}
+.hour {
+ flex:0 0 83px;text-align:center;background:var(--card);
+ border:1px solid var(--border);border-radius:18px;padding:15px 6px
+}
+.hour-time {font-size:12px;color:var(--muted)}
+.hour-icon {font-size:26px;margin:15px 0}
+.hour-temp {font-weight:bold}
+.days {display:flex;flex-direction:column;gap:8px}
+.day {
+ display:grid;grid-template-columns:1fr 38px 55px 70px;
+ align-items:center;gap:8px;background:var(--card);
+ border:1px solid var(--border);border-radius:15px;padding:13px 12px
+}
+.day-name {font-size:13px}
+.day-icon {font-size:23px}
+.day-high {font-weight:bold;text-align:left}
+.day-low {color:var(--muted);font-size:12px;text-align:left}
+.day-condition {font-size:10px;color:var(--muted);margin-top:5px}
+.footer {text-align:center;font-size:11px;color:var(--muted);margin-top:25px}
+.loading {text-align:center;padding:30px;color:var(--muted)}
+button:active {transform:scale(.97)}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">🌦️ Weather<small>آب‌وهوای هوشمند</small></div>
+  <button class="iconbtn" id="themeBtn" onclick="toggleTheme()">☀️ / 🌙</button>
+</header>
+
+<form class="search" id="searchForm">
+  <input id="cityInput" placeholder="نام شهر را وارد کن..." value="تهران">
+  <button type="submit">جست‌وجو</button>
+</form>
+
+<div id="message" class="loading">در حال دریافت اطلاعات آب‌وهوا...</div>
+
+<main id="weather" hidden>
+<section class="hero">
+  <div class="city" id="cityName">📍 تهران</div>
+  <div class="condition" id="condition">در حال بارگذاری...</div>
+  <div class="temperature">
+    <div>
+      <div class="temp"><span id="temperature">--</span>°</div>
+      <div class="feels">احساس واقعی <span id="feels">--</span>°</div>
+    </div>
+    <div class="weather-icon" id="mainIcon">🌤️</div>
+  </div>
+</section>
+
+<div class="section-title">شرایط فعلی</div>
+<div class="stats">
+  <div class="card"><div class="stat-icon">💧</div><div class="stat-name">رطوبت</div><div class="stat-value" id="humidity">--%</div></div>
+  <div class="card"><div class="stat-icon">💨</div><div class="stat-name">سرعت باد</div><div class="stat-value" id="wind">--</div></div>
+  <div class="card"><div class="stat-icon">☀️</div><div class="stat-name">شاخص UV</div><div class="stat-value" id="uv">--</div></div>
+</div>
+
+<div class="section-title">⏱️ پیش‌بینی ساعتی</div>
+<div class="hourly" id="hourly"></div>
+
+<div class="section-title">📅 پیش‌بینی ۷ روز آینده</div>
+<div class="days" id="days"></div>
+</main>
+<div class="footer">اطلاعات هواشناسی با Open-Meteo · طراحی Weather</div>
+</div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+tg?.ready();
+tg?.expand();
+
+const $ = id => document.getElementById(id);
+
+function weatherInfo(code, isDay=true) {
+  if(code===0) return [isDay?'☀️':'🌙','آسمان صاف'];
+  if(code===1) return ['🌤️','عمدتاً صاف'];
+  if(code===2) return ['⛅','کمی ابری'];
+  if(code===3) return ['☁️','ابری'];
+  if([45,48].includes(code)) return ['🌫️','مه‌آلود'];
+  if([51,53,55,56,57].includes(code)) return ['🌦️','نم‌نم باران'];
+  if([61,63,65,66,67,80,81,82].includes(code)) return ['🌧️','بارانی'];
+  if([71,73,75,77,85,86].includes(code)) return ['❄️','برفی'];
+  if([95,96,99].includes(code)) return ['⛈️','رعدوبرق'];
+  return ['🌤️','متغیر'];
+}
+
+async function loadWeather(city) {
+  $('message').hidden=false;
+  $('message').textContent='در حال دریافت اطلاعات '+city+'...';
+  $('weather').hidden=true;
+
+  try {
+    const geoUrl='https://geocoding-api.open-meteo.com/v1/search?name='+
+      encodeURIComponent(city)+'&count=1&language=fa&format=json';
+    const gr=await fetch(geoUrl);
+    if(!gr.ok) throw Error('دریافت اطلاعات شهر ناموفق بود');
+    const gd=await gr.json();
+    if(!gd.results?.length) throw Error('شهر پیدا نشد؛ نام دیگری امتحان کن.');
+
+    const place=gd.results[0];
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+
+      place.latitude+'&longitude='+place.longitude+
+      '&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m'+
+      '&hourly=temperature_2m,weather_code,precipitation_probability'+
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,sunrise,sunset'+
+      '&timezone=auto&forecast_days=7';
+
+    const wr=await fetch(url);
+    if(!wr.ok) throw Error('دریافت پیش‌بینی ناموفق بود');
+    const data=await wr.json();
+    const c=data.current, d=data.daily, h=data.hourly;
+    const info=weatherInfo(c.weather_code,!!c.is_day);
+
+    $('cityName').textContent='📍 '+place.name+(place.admin1?'، '+place.admin1:'');
+    $('condition').textContent=info[1];
+    $('temperature').textContent=Math.round(c.temperature_2m);
+    $('feels').textContent=Math.round(c.apparent_temperature);
+    $('mainIcon').textContent=info[0];
+    $('humidity').textContent=c.relative_humidity_2m+'٪';
+    $('wind').textContent=Math.round(c.wind_speed_10m)+' km/h';
+    $('uv').textContent=d.uv_index_max[0];
+
+    const faTime=t=>t.slice(11,16);
+    const now=c.time;
+    let start=h.time.findIndex(t=>t>=now);
+    if(start<0)start=0;
+    $('hourly').innerHTML='';
+    for(let i=start;i<Math.min(start+12,h.time.length);i++){
+      const wi=weatherInfo(h.weather_code[i]);
+      $('hourly').insertAdjacentHTML('beforeend',`
+        <div class="hour">
+          <div class="hour-time">${i===start?'اکنون':faTime(h.time[i])}</div>
+          <div class="hour-icon">${wi[0]}</div>
+          <div class="hour-temp">${Math.round(h.temperature_2m[i])}°</div>
+          <div class="day-condition">🌧️ ${h.precipitation_probability?.[i]??0}٪</div>
+        </div>`);
+    }
+
+    const weekdays=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+    $('days').innerHTML='';
+    for(let i=0;i<d.time.length;i++){
+      const dt=new Date(d.time[i]+'T12:00:00');
+      const wi=weatherInfo(d.weather_code[i]);
+      $('days').insertAdjacentHTML('beforeend',`
+        <div class="day">
+          <div><div class="day-name">${i===0?'امروز':weekdays[dt.getDay()]}</div><div class="day-condition">${wi[1]}</div></div>
+          <div class="day-icon">${wi[0]}</div>
+          <div class="day-high">${Math.round(d.temperature_2m_max[i])}°</div>
+          <div class="day-low">${Math.round(d.temperature_2m_min[i])}°</div>
+        </div>`);
+    }
+
+    $('message').hidden=true;
+    $('weather').hidden=false;
+    $('cityInput').value=place.name;
+  } catch(e) {
+    $('message').textContent='❌ '+e.message+' اتصال اینترنت را بررسی کن.';
+    $('message').hidden=false;
+  }
+}
+
+$('searchForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const city=$('cityInput').value.trim();
+  if(city)loadWeather(city);
+});
+
+function toggleTheme(){
+  document.body.classList.toggle('light');
+  localStorage.setItem('weather-theme',
+    document.body.classList.contains('light')?'light':'dark');
+}
+if(localStorage.getItem('weather-theme')==='light')
+  document.body.classList.add('light');
+
+loadWeather('Tehran');
+</script>
+</body>
+</html>
