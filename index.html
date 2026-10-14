@@ -2,248 +2,1014 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#07111f">
-<title>Weather | آب‌وهوای هوشمند</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5b8def">
+<title>آب‌وهوا | Weather</title>
+
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+
 :root {
-  --bg:#07111f; --card:#101f32; --text:#f3f7ff;
-  --muted:#91a7c2; --blue:#50bfff; --border:#1c3048;
+  --text: #ffffff;
+  --muted: rgba(255,255,255,.75);
+  --glass: rgba(255,255,255,.16);
+  --border: rgba(255,255,255,.23);
+  --shadow: 0 12px 35px rgba(12,32,70,.15);
 }
-body.light {
-  --bg:#edf5ff; --card:#fff; --text:#12233b;
-  --muted:#647891; --blue:#087fd1; --border:#dce7f5;
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
-*{box-sizing:border-box}
+
 body {
-  margin:0; font-family:Tahoma,Arial,sans-serif;
-  background:var(--bg); color:var(--text);
-  transition:background .3s; min-height:100vh;
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Vazirmatn', sans-serif;
+  color: var(--text);
+  background: linear-gradient(160deg,#4d9df5,#7b83ee,#b18cf4);
+  background-attachment: fixed;
+  transition: background .8s ease;
+  overflow-x: hidden;
 }
-.app {max-width:480px;margin:auto;padding:20px 16px 35px}
-header {display:flex;align-items:center;justify-content:space-between}
-.brand {font-size:18px;font-weight:bold}
-.brand small {display:block;color:var(--muted);font-size:11px;margin-top:5px}
-button,input {font:inherit}
-.iconbtn {
-  background:var(--card);color:var(--text);border:1px solid var(--border);
-  border-radius:14px;padding:10px;cursor:pointer
+
+body.sunny {
+  background: linear-gradient(160deg,#4facfe,#00c6ff,#8bd8ff);
 }
-.search {display:flex;gap:8px;margin-top:24px}
-.search input {
-  flex:1;min-width:0;background:var(--card);color:var(--text);
-  border:1px solid var(--border);border-radius:14px;padding:14px;outline:none
+
+body.cloudy {
+  background: linear-gradient(160deg,#536976,#8196a6,#b8c6db);
 }
-.search button {
-  background:var(--blue);color:#041321;border:0;
-  border-radius:14px;padding:0 17px;font-weight:bold;cursor:pointer
+
+body.rainy {
+  background: linear-gradient(160deg,#182848,#355c7d,#6c8ba5);
 }
+
+body.snowy {
+  background: linear-gradient(160deg,#83a4d4,#b6fbff,#8ca6db);
+}
+
+body.night {
+  background: linear-gradient(160deg,#10152f,#202b50,#434d75);
+}
+
+body.light {
+  --text: #1c2a46;
+  --muted: rgba(28,42,70,.7);
+  --glass: rgba(255,255,255,.52);
+  --border: rgba(255,255,255,.7);
+  background: linear-gradient(160deg,#d9edff,#e9e3ff,#f7eaff);
+  background-attachment: fixed;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  width: min(100%, 520px);
+  min-height: 100vh;
+  margin: auto;
+  padding: 22px 17px 110px;
+  position: relative;
+  z-index: 1;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+}
+
+.top-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 43px;
+  height: 43px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--glass);
+  color: var(--text);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  font-size: 19px;
+}
+
+.search-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  width: 100%;
+  min-width: 0;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  outline: none;
+  color: var(--text);
+  background: var(--glass);
+  backdrop-filter: blur(15px);
+}
+
+.search-box input::placeholder {
+  color: var(--muted);
+}
+
+.search-box button {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 0 18px;
+  color: var(--text);
+  background: var(--glass);
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 25px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow);
+}
+
 .hero {
-  margin-top:20px;padding:24px 18px;border-radius:26px;
-  background:linear-gradient(145deg,#173b60,#10223b 65%,#17263e);
-  position:relative;overflow:hidden
+  text-align: center;
+  padding: 25px 18px 23px;
+  position: relative;
+  overflow: hidden;
 }
-body.light .hero {background:linear-gradient(145deg,#c4e7ff,#e9f4ff)}
-.hero:after {
-  content:"";position:absolute;width:180px;height:180px;
-  border-radius:50%;background:#48b8ff12;left:-50px;top:-55px
+
+.city {
+  font-size: 24px;
+  font-weight: 800;
 }
-.city {font-size:16px;color:#c6e6ff}
-body.light .city {color:#275777}
-.condition {color:#b7cce4;font-size:13px;margin-top:12px}
-body.light .condition {color:#476580}
-.temperature {display:flex;align-items:center;justify-content:space-between;margin-top:15px}
-.temp {font-size:65px;font-weight:300;letter-spacing:-3px}
-.weather-icon {font-size:65px;filter:drop-shadow(0 5px 12px #0003)}
-.feels {font-size:13px;color:#c6ddf4}
-body.light .feels {color:#476580}
-.section-title {font-size:16px;font-weight:bold;margin:25px 2px 14px}
-.stats {display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.card {
- background:var(--card);border:1px solid var(--border);
- border-radius:18px;padding:15px 8px;text-align:center
+
+.date {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
 }
-.stat-icon {font-size:23px}
-.stat-name {font-size:11px;color:var(--muted);margin-top:10px}
-.stat-value {font-size:15px;font-weight:bold;margin-top:9px}
-.hourly {display:flex;gap:10px;overflow-x:auto;padding-bottom:5px}
+
+.weather-icon {
+  font-size: 95px;
+  line-height: 1.5;
+  margin: 8px 0;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,.12));
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+.temperature {
+  font-size: 65px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -3px;
+}
+
+.description {
+  font-size: 17px;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.feels {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 26px 3px 13px;
+  font-weight: 800;
+  font-size: 17px;
+}
+
+.section-title small {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 11px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 11px;
+}
+
+.stat {
+  padding: 17px 15px;
+  min-width: 0;
+}
+
+.stat-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stat-icon {
+  font-size: 21px;
+}
+
+.stat-value {
+  margin-top: 10px;
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.stat-unit {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.stat-sub {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.hourly {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 3px 1px 12px;
+  scrollbar-width: none;
+}
+
+.hourly::-webkit-scrollbar,
+.days::-webkit-scrollbar {
+  display: none;
+}
+
 .hour {
- flex:0 0 83px;text-align:center;background:var(--card);
- border:1px solid var(--border);border-radius:18px;padding:15px 6px
+  flex: 0 0 84px;
+  text-align: center;
+  padding: 14px 7px;
+  border-radius: 20px;
 }
-.hour-time {font-size:12px;color:var(--muted)}
-.hour-icon {font-size:26px;margin:15px 0}
-.hour-temp {font-weight:bold}
-.days {display:flex;flex-direction:column;gap:8px}
+
+.hour.now {
+  background: rgba(255,255,255,.28);
+  border-color: rgba(255,255,255,.6);
+}
+
+.hour-time {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.hour-icon {
+  font-size: 28px;
+  margin: 10px 0;
+}
+
+.hour-temp {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.hour-rain {
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
 .day {
- display:grid;grid-template-columns:1fr 38px 55px 70px;
- align-items:center;gap:8px;background:var(--card);
- border:1px solid var(--border);border-radius:15px;padding:13px 12px
+  display: grid;
+  grid-template-columns: 1fr 35px 43px 85px;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 14px;
+  border-radius: 18px;
 }
-.day-name {font-size:13px}
-.day-icon {font-size:23px}
-.day-high {font-weight:bold;text-align:left}
-.day-low {color:var(--muted);font-size:12px;text-align:left}
-.day-condition {font-size:10px;color:var(--muted);margin-top:5px}
-.footer {text-align:center;font-size:11px;color:var(--muted);margin-top:25px}
-.loading {text-align:center;padding:30px;color:var(--muted)}
-button:active {transform:scale(.97)}
+
+.day-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.day-icon {
+  font-size: 24px;
+  text-align: center;
+}
+
+.day-rain {
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+.day-temps {
+  direction: ltr;
+  display: flex;
+  justify-content: space-between;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.day-temps span:last-child {
+  color: var(--muted);
+}
+
+.notice {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 20px 0 0;
+}
+
+.error {
+  display: none;
+  text-align: center;
+  padding: 16px;
+  margin-top: 15px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.loading {
+  display: none;
+  text-align: center;
+  padding: 15px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.bottom-nav {
+  position: fixed;
+  z-index: 10;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 28px), 470px);
+  padding: 9px;
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 5px;
+  border: 1px solid var(--border);
+  border-radius: 23px;
+  background: rgba(30,42,75,.55);
+  box-shadow: 0 12px 40px rgba(0,0,0,.2);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+}
+
+body.light .bottom-nav {
+  background: rgba(255,255,255,.75);
+}
+
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 0;
+  border-radius: 15px;
+  padding: 8px 2px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.nav-btn span {
+  font-size: 20px;
+}
+
+.nav-btn.active {
+  background: rgba(255,255,255,.2);
+  color: var(--text);
+}
+
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 25px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#morePanel {
+  padding: 20px;
+  line-height: 2;
+  font-size: 13px;
+}
+
+#morePanel button {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  color: var(--text);
+  background: var(--glass);
+}
+
+.background-effects {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.sun-glow {
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  top: 100px;
+  left: -90px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  filter: blur(3px);
+  animation: sunPulse 7s ease-in-out infinite;
+}
+
+@keyframes sunPulse {
+  0%,100% { transform: scale(1); opacity: .55; }
+  50% { transform: scale(1.15); opacity: .9; }
+}
+
+.cloud {
+  position: absolute;
+  width: 100px;
+  height: 30px;
+  border-radius: 40px;
+  background: rgba(255,255,255,.12);
+  filter: blur(1px);
+  animation: drift 22s linear infinite;
+}
+
+.cloud::before,
+.cloud::after {
+  content: "";
+  position: absolute;
+  bottom: 8px;
+  border-radius: 50%;
+  background: inherit;
+}
+
+.cloud::before {
+  width: 42px;
+  height: 42px;
+  left: 15px;
+}
+
+.cloud::after {
+  width: 52px;
+  height: 52px;
+  left: 42px;
+}
+
+.cloud.one {
+  top: 22%;
+  left: -130px;
+}
+
+.cloud.two {
+  top: 53%;
+  left: -160px;
+  animation-delay: -12s;
+  transform: scale(.7);
+}
+
+@keyframes drift {
+  from { translate: 0 0; }
+  to { translate: calc(100vw + 300px) 0; }
+}
+
+#rainLayer,
+#snowLayer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.raindrop {
+  position: absolute;
+  top: -35px;
+  width: 2px;
+  height: 20px;
+  background: rgba(255,255,255,.45);
+  border-radius: 5px;
+  animation: rainFall linear infinite;
+}
+
+@keyframes rainFall {
+  to { transform: translate3d(-40px,110vh,0); }
+}
+
+.snowflake {
+  position: absolute;
+  top: -20px;
+  color: rgba(255,255,255,.75);
+  animation: snowFall linear infinite;
+}
+
+@keyframes snowFall {
+  to { transform: translate3d(25px,110vh,0) rotate(300deg); }
+}
+
+@media (max-width: 360px) {
+  .app {
+    padding-inline: 12px;
+  }
+
+  .temperature {
+    font-size: 57px;
+  }
+
+  .day {
+    grid-template-columns: 1fr 28px 35px 75px;
+    gap: 5px;
+    padding: 12px 9px;
+  }
+
+  .stat-value {
+    font-size: 21px;
+  }
+}
 </style>
 </head>
-<body>
-<div class="app">
-<header>
-  <div class="brand">🌦️ Weather<small>آب‌وهوای هوشمند</small></div>
-  <button class="iconbtn" id="themeBtn" onclick="toggleTheme()">☀️ / 🌙</button>
-</header>
 
-<form class="search" id="searchForm">
-  <input id="cityInput" placeholder="نام شهر را وارد کن..." value="تهران">
-  <button type="submit">جست‌وجو</button>
-</form>
+<body class="sunny">
 
-<div id="message" class="loading">در حال دریافت اطلاعات آب‌وهوا...</div>
+<div class="background-effects">
+  <div class="sun-glow"></div>
+  <div class="cloud one"></div>
+  <div class="cloud two"></div>
+  <div id="rainLayer"></div>
+  <div id="snowLayer"></div>
+</div>
 
-<main id="weather" hidden>
-<section class="hero">
-  <div class="city" id="cityName">📍 تهران</div>
-  <div class="condition" id="condition">در حال بارگذاری...</div>
-  <div class="temperature">
-    <div>
-      <div class="temp"><span id="temperature">--</span>°</div>
-      <div class="feels">احساس واقعی <span id="feels">--</span>°</div>
+<main class="app">
+
+  <header class="topbar">
+    <div class="brand">☁️ آب‌وهوای من</div>
+    <div class="top-actions">
+      <button class="icon-btn" id="locationBtn" aria-label="مکان فعلی">⌖</button>
+      <button class="icon-btn" id="themeBtn" aria-label="تغییر تم">☾</button>
     </div>
-    <div class="weather-icon" id="mainIcon">🌤️</div>
-  </div>
-</section>
+  </header>
 
-<div class="section-title">شرایط فعلی</div>
-<div class="stats">
-  <div class="card"><div class="stat-icon">💧</div><div class="stat-name">رطوبت</div><div class="stat-value" id="humidity">--%</div></div>
-  <div class="card"><div class="stat-icon">💨</div><div class="stat-name">سرعت باد</div><div class="stat-value" id="wind">--</div></div>
-  <div class="card"><div class="stat-icon">☀️</div><div class="stat-name">شاخص UV</div><div class="stat-value" id="uv">--</div></div>
-</div>
+  <form class="search-box" id="searchForm">
+    <input id="cityInput" type="search" placeholder="نام شهر را وارد کن..." autocomplete="off">
+    <button type="submit">جستجو</button>
+  </form>
 
-<div class="section-title">⏱️ پیش‌بینی ساعتی</div>
-<div class="hourly" id="hourly"></div>
+  <div class="loading" id="loading">در حال دریافت اطلاعات آب‌وهوا...</div>
+  <div class="error glass" id="errorBox"></div>
 
-<div class="section-title">📅 پیش‌بینی ۷ روز آینده</div>
-<div class="days" id="days"></div>
+  <section id="weatherContent">
+
+    <section class="hero glass" id="homeSection">
+      <div class="city" id="cityName">تهران</div>
+      <div class="date" id="dateText">در حال دریافت تاریخ...</div>
+      <div class="weather-icon" id="weatherIcon">☀️</div>
+      <div class="temperature"><span id="temperature">--</span>°</div>
+      <div class="description" id="description">در حال دریافت وضعیت...</div>
+      <div class="feels">احساس واقعی: <b id="feelsLike">--</b>°</div>
+    </section>
+
+    <div class="section-title">
+      <span>جزئیات امروز</span>
+      <small>اطلاعات زنده</small>
+    </div>
+
+    <section class="stats" id="statsSection">
+
+      <div class="stat glass">
+        <div class="stat-head"><span class="stat-icon">💧</span> رطوبت</div>
+        <div class="stat-value"><span id="humidity">--</span><span class="stat-unit">٪</span></div>
+        <div class="stat-sub">میزان رطوبت هوا</div>
+      </div>
+
+      <div class="stat glass">
+        <div class="stat-head"><span class="stat-icon">💨</span> سرعت باد</div>
+        <div class="stat-value"><span id="wind">--</span><span class="stat-unit"> km/h</span></div>
+        <div class="stat-sub">سرعت باد در محل</div>
+      </div>
+
+      <div class="stat glass">
+        <div class="stat-head"><span class="stat-icon">🌡️</span> بیشینه امروز</div>
+        <div class="stat-value"><span id="maxTemp">--</span>°</div>
+        <div class="stat-sub">بالاترین دما</div>
+      </div>
+
+      <div class="stat glass">
+        <div class="stat-head"><span class="stat-icon">❄️</span> کمینه امروز</div>
+        <div class="stat-value"><span id="minTemp">--</span>°</div>
+        <div class="stat-sub">پایین‌ترین دما</div>
+      </div>
+
+    </section>
+
+    <section id="hourSection">
+      <div class="section-title">
+        <span>پیش‌بینی ساعتی</span>
+        <small>۲۴ ساعت آینده</small>
+      </div>
+      <div class="hourly" id="hourlyList"></div>
+    </section>
+
+    <section id="daysSection">
+      <div class="section-title">
+        <span>پیش‌بینی ۷ روز آینده</span>
+        <small>هفتگی</small>
+      </div>
+      <div class="days" id="daysList"></div>
+    </section>
+
+    <section id="morePanel" class="glass hidden">
+      <h3>درباره برنامه</h3>
+      <p>پیش‌بینی وضعیت آب‌وهوا با اطلاعات سرویس Open-Meteo انجام می‌شود.</p>
+      <p>برای مشاهده آب‌وهوای یک شهر، نام آن را در کادر جستجو وارد کن.</p>
+      <button id="refreshBtn">🔄 بروزرسانی اطلاعات</button>
+    </section>
+
+    <div class="notice" id="updatedText"></div>
+    <div class="footer">داده‌های هواشناسی از Open-Meteo</div>
+
+  </section>
 </main>
-<div class="footer">اطلاعات هواشناسی با Open-Meteo · طراحی Weather</div>
-</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-target="home">
+    <span>⌂</span>امروز
+  </button>
+  <button class="nav-btn" data-target="hour">
+    <span>◷</span>ساعتی
+  </button>
+  <button class="nav-btn" data-target="days">
+    <span>▦</span>هفتگی
+  </button>
+  <button class="nav-btn" data-target="more">
+    <span>☰</span>بیشتر
+  </button>
+</nav>
 
 <script>
-const tg = window.Telegram?.WebApp;
-tg?.ready();
-tg?.expand();
-
 const $ = id => document.getElementById(id);
 
-function weatherInfo(code, isDay=true) {
-  if(code===0) return [isDay?'☀️':'🌙','آسمان صاف'];
-  if(code===1) return ['🌤️','عمدتاً صاف'];
-  if(code===2) return ['⛅','کمی ابری'];
-  if(code===3) return ['☁️','ابری'];
-  if([45,48].includes(code)) return ['🌫️','مه‌آلود'];
-  if([51,53,55,56,57].includes(code)) return ['🌦️','نم‌نم باران'];
-  if([61,63,65,66,67,80,81,82].includes(code)) return ['🌧️','بارانی'];
-  if([71,73,75,77,85,86].includes(code)) return ['❄️','برفی'];
-  if([95,96,99].includes(code)) return ['⛈️','رعدوبرق'];
-  return ['🌤️','متغیر'];
+let currentCity = 'Tehran';
+let currentLat = 35.6892;
+let currentLon = 51.3890;
+let isLoading = false;
+
+const weatherInfo = code => {
+  if (code === 0) return ['آسمان صاف','☀️','sunny'];
+  if (code === 1) return ['عمدتاً صاف','🌤️','sunny'];
+  if (code === 2) return ['کمی ابری','⛅','cloudy'];
+  if (code === 3) return ['ابری','☁️','cloudy'];
+  if ([45,48].includes(code)) return ['مه‌آلود','🌫️','cloudy'];
+  if ([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code)) {
+    return ['بارانی','🌧️','rainy'];
+  }
+  if ([71,73,75,77,85,86].includes(code)) {
+    return ['برفی','❄️','snowy'];
+  }
+  return ['وضعیت نامشخص','🌡️','cloudy'];
+};
+
+function toPersianDigits(value) {
+  return String(value).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 }
 
-async function loadWeather(city) {
-  $('message').hidden=false;
-  $('message').textContent='در حال دریافت اطلاعات '+city+'...';
-  $('weather').hidden=true;
+function formatTemp(value) {
+  return Math.round(value);
+}
 
-  try {
-    const geoUrl='https://geocoding-api.open-meteo.com/v1/search?name='+
-      encodeURIComponent(city)+'&count=1&language=fa&format=json';
-    const gr=await fetch(geoUrl);
-    if(!gr.ok) throw Error('دریافت اطلاعات شهر ناموفق بود');
-    const gd=await gr.json();
-    if(!gd.results?.length) throw Error('شهر پیدا نشد؛ نام دیگری امتحان کن.');
+function formatDay(dateString) {
+  const date = new Date(dateString + 'T12:00:00');
+  return new Intl.DateTimeFormat('fa-IR', {
+    weekday: 'long'
+  }).format(date);
+}
 
-    const place=gd.results[0];
-    const url='https://api.open-meteo.com/v1/forecast?latitude='+
-      place.latitude+'&longitude='+place.longitude+
-      '&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m'+
-      '&hourly=temperature_2m,weather_code,precipitation_probability'+
-      '&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,sunrise,sunset'+
-      '&timezone=auto&forecast_days=7';
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('fa-IR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long'
+  }).format(date);
+}
 
-    const wr=await fetch(url);
-    if(!wr.ok) throw Error('دریافت پیش‌بینی ناموفق بود');
-    const data=await wr.json();
-    const c=data.current, d=data.daily, h=data.hourly;
-    const info=weatherInfo(c.weather_code,!!c.is_day);
+function formatHour(dateString) {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('fa-IR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).format(date);
+}
 
-    $('cityName').textContent='📍 '+place.name+(place.admin1?'، '+place.admin1:'');
-    $('condition').textContent=info[1];
-    $('temperature').textContent=Math.round(c.temperature_2m);
-    $('feels').textContent=Math.round(c.apparent_temperature);
-    $('mainIcon').textContent=info[0];
-    $('humidity').textContent=c.relative_humidity_2m+'٪';
-    $('wind').textContent=Math.round(c.wind_speed_10m)+' km/h';
-    $('uv').textContent=d.uv_index_max[0];
+function setWeatherBackground(code, isDay) {
+  const info = weatherInfo(code);
+  document.body.classList.remove('sunny','cloudy','rainy','snowy','night');
 
-    const faTime=t=>t.slice(11,16);
-    const now=c.time;
-    let start=h.time.findIndex(t=>t>=now);
-    if(start<0)start=0;
-    $('hourly').innerHTML='';
-    for(let i=start;i<Math.min(start+12,h.time.length);i++){
-      const wi=weatherInfo(h.weather_code[i]);
-      $('hourly').insertAdjacentHTML('beforeend',`
-        <div class="hour">
-          <div class="hour-time">${i===start?'اکنون':faTime(h.time[i])}</div>
-          <div class="hour-icon">${wi[0]}</div>
-          <div class="hour-temp">${Math.round(h.temperature_2m[i])}°</div>
-          <div class="day-condition">🌧️ ${h.precipitation_probability?.[i]??0}٪</div>
-        </div>`);
+  if (!isDay) {
+    document.body.classList.add('night');
+  } else {
+    document.body.classList.add(info[2]);
+  }
+
+  createWeatherEffects(info[2]);
+}
+
+function createWeatherEffects(type) {
+  $('rainLayer').innerHTML = '';
+  $('snowLayer').innerHTML = '';
+
+  if (type === 'rainy') {
+    for (let i = 0; i < 65; i++) {
+      const drop = document.createElement('i');
+      drop.className = 'raindrop';
+      drop.style.left = Math.random() * 100 + '%';
+      drop.style.animationDuration = (0.65 + Math.random() * 0.8) + 's';
+      drop.style.animationDelay = (-Math.random() * 2) + 's';
+      drop.style.opacity = 0.25 + Math.random() * 0.55;
+      $('rainLayer').appendChild(drop);
     }
+  }
 
-    const weekdays=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
-    $('days').innerHTML='';
-    for(let i=0;i<d.time.length;i++){
-      const dt=new Date(d.time[i]+'T12:00:00');
-      const wi=weatherInfo(d.weather_code[i]);
-      $('days').insertAdjacentHTML('beforeend',`
-        <div class="day">
-          <div><div class="day-name">${i===0?'امروز':weekdays[dt.getDay()]}</div><div class="day-condition">${wi[1]}</div></div>
-          <div class="day-icon">${wi[0]}</div>
-          <div class="day-high">${Math.round(d.temperature_2m_max[i])}°</div>
-          <div class="day-low">${Math.round(d.temperature_2m_min[i])}°</div>
-        </div>`);
+  if (type === 'snowy') {
+    for (let i = 0; i < 40; i++) {
+      const flake = document.createElement('i');
+      flake.className = 'snowflake';
+      flake.textContent = '❄';
+      flake.style.left = Math.random() * 100 + '%';
+      flake.style.fontSize = (8 + Math.random() * 12) + 'px';
+      flake.style.animationDuration = (5 + Math.random() * 8) + 's';
+      flake.style.animationDelay = (-Math.random() * 10) + 's';
+      $('snowLayer').appendChild(flake);
     }
-
-    $('message').hidden=true;
-    $('weather').hidden=false;
-    $('cityInput').value=place.name;
-  } catch(e) {
-    $('message').textContent='❌ '+e.message+' اتصال اینترنت را بررسی کن.';
-    $('message').hidden=false;
   }
 }
 
-$('searchForm').addEventListener('submit',e=>{
-  e.preventDefault();
-  const city=$('cityInput').value.trim();
-  if(city)loadWeather(city);
+function showLoading(show) {
+  $('loading').style.display = show ? 'block' : 'none';
+}
+
+function showError(message) {
+  $('errorBox').textContent = message;
+  $('errorBox').style.display = 'block';
+}
+
+function hideError() {
+  $('errorBox').style.display = 'none';
+}
+
+async function searchCity(name) {
+  const url = 'https://geocoding-api.open-meteo.com/v1/search?name='
+    + encodeURIComponent(name)
+    + '&count=1&language=fa&format=json';
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('خطا در جستجوی شهر');
+
+  const data = await response.json();
+  if (!data.results || data.results.length === 0) {
+    throw new Error('این شهر پیدا نشد. نام شهر را بررسی کن.');
+  }
+
+  const place = data.results[0];
+  currentCity = place.name;
+  currentLat = place.latitude;
+  currentLon = place.longitude;
+
+  if (place.country) {
+    currentCity += '، ' + place.country;
+  }
+
+  await loadWeather();
+}
+
+async function loadWeather() {
+  if (isLoading) return;
+
+  isLoading = true;
+  showLoading(true);
+  hideError();
+
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude='
+      + currentLat
+      + '&longitude='
+      + currentLon
+      + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m'
+      + '&hourly=temperature_2m,precipitation_probability,weather_code'
+      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
+      + '&timezone=auto&forecast_days=7';
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('دریافت اطلاعات آب‌وهوا ناموفق بود.');
+
+    const data = await response.json();
+    const c = data.current;
+    const d = data.daily;
+    const info = weatherInfo(c.weather_code);
+
+    $('cityName').textContent = currentCity;
+    $('dateText').textContent = formatDate(c.time);
+    $('weatherIcon').textContent = info[1];
+    $('temperature').textContent = toPersianDigits(formatTemp(c.temperature_2m));
+    $('description').textContent = info[0];
+    $('feelsLike').textContent = toPersianDigits(formatTemp(c.apparent_temperature));
+
+    $('humidity').textContent = toPersianDigits(c.relative_humidity_2m);
+    $('wind').textContent = toPersianDigits(Math.round(c.wind_speed_10m));
+    $('maxTemp').textContent = toPersianDigits(formatTemp(d.temperature_2m_max[0]));
+    $('minTemp').textContent = toPersianDigits(formatTemp(d.temperature_2m_min[0]));
+
+    setWeatherBackground(c.weather_code, c.is_day === 1);
+
+    renderHourly(data.hourly, c.time);
+    renderDays(d);
+
+    $('updatedText').textContent =
+      'آخرین بروزرسانی: ' + formatHour(c.time);
+
+  } catch (error) {
+    showError(error.message || 'اتصال برقرار نشد. اینترنتت را بررسی کن.');
+  } finally {
+    isLoading = false;
+    showLoading(false);
+  }
+}
+
+function renderHourly(hourly, currentTime) {
+  const container = $('hourlyList');
+  container.innerHTML = '';
+
+  let startIndex = hourly.time.findIndex(t => t >= currentTime);
+  if (startIndex < 0) startIndex = 0;
+
+  for (let i = startIndex; i < Math.min(startIndex + 24, hourly.time.length); i++) {
+    const info = weatherInfo(hourly.weather_code[i]);
+    const item = document.createElement('div');
+
+    item.className = 'hour glass' + (i === startIndex ? ' now' : '');
+
+    const timeLabel = i === startIndex ? 'اکنون' : formatHour(hourly.time[i]);
+    const rainChance = hourly.precipitation_probability[i];
+
+    item.innerHTML = `
+      <div class="hour-time">${timeLabel}</div>
+      <div class="hour-icon">${info[1]}</div>
+      <div class="hour-temp">${toPersianDigits(formatTemp(hourly.temperature_2m[i]))}°</div>
+      <div class="hour-rain">💧 ${toPersianDigits(rainChance ?? 0)}٪</div>
+    `;
+
+    container.appendChild(item);
+  }
+}
+
+function renderDays(daily) {
+  const container = $('daysList');
+  container.innerHTML = '';
+
+  for (let i = 0; i < daily.time.length; i++) {
+    const info = weatherInfo(daily.weather_code[i]);
+    const item = document.createElement('div');
+
+    item.className = 'day glass';
+
+    const name = i === 0 ? 'امروز' :
+      i === 1 ? 'فردا' : formatDay(daily.time[i]);
+
+    item.innerHTML = `
+      <div class="day-name">${name}</div>
+      <div class="day-icon">${info[1]}</div>
+      <div class="day-rain">💧 ${toPersianDigits(daily.precipitation_probability_max[i] ?? 0)}٪</div>
+      <div class="day-temps">
+        <span>${toPersianDigits(formatTemp(daily.temperature_2m_max[i]))}°</span>
+        <span>${toPersianDigits(formatTemp(daily.temperature_2m_min[i]))}°</span>
+      </div>
+    `;
+
+    container.appendChild(item);
+  }
+}
+
+$('searchForm').addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const city = $('cityInput').value.trim();
+  if (!city) {
+    $('cityInput').focus();
+    return;
+  }
+
+  try {
+    await searchCity(city);
+  } catch (error) {
+    showError(error.message || 'شهر موردنظر پیدا نشد.');
+  }
 });
 
-function toggleTheme(){
+$('themeBtn').addEventListener('click', () => {
   document.body.classList.toggle('light');
-  localStorage.setItem('weather-theme',
-    document.body.classList.contains('light')?'light':'dark');
-}
-if(localStorage.getItem('weather-theme')==='light')
-  document.body.classList.add('light');
+  $('themeBtn').textContent =
+    document.body.classList.contains('light') ? '☀' : '☾';
+});
 
-loadWeather('Tehran');
+$('locationBtn').addEventListener('click', () => {
+  if (!navigator.geolocation) {
+    showError('مرورگر از مکان‌یابی پشتیبانی نمی‌کند.');
+    return;
+  }
+
+  showLoading(true);
+  hideError();
+
+  navigator.geolocation.getCurrentPosition(async position => {
+    currentLat = position.coords.latitude;
+    currentLon = position.coords.longitude;
+    currentCity = 'مکان فعلی';
+
+    await loadWeather();
+  }, () => {
+    showLoading(false);
+    showError('برای تشخیص مکان، اجازه دسترسی به موقعیت را فعال کن.');
+  }, {
+    enableHighAccuracy: true,
+    timeout: 10000
+  });
+});
+
+$('refreshBtn').addEventListener('click', loadWeather);
+
+document.querySelectorAll('.nav-btn').forEach(button => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    button.classList.add('active');
+
+    const target = button.dataset.target;
+
+    $('morePanel').classList.toggle('hidden', target !== 'more');
+
+    if (target === 'home') {
+      $('homeSection').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    if (target === 'hour') {
+      $('hourSection').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    if (target === 'days') {
+      $('daysSection').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    if (target === 'more') {
+      $('morePanel').scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+});
+
+if (window.Telegram && window.Telegram.WebApp) {
+  Telegram.WebApp.ready();
+  Telegram.WebApp.expand();
+}
+
+loadWeather();
 </script>
+
 </body>
 </html>
